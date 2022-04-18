@@ -1,0 +1,17 @@
+/* *{
+    background: #000 !important;
+    color: #0f0 !important;
+    outline: solid #f00 1px !important;
+}*/
+
+.container-5{
+    width: 75%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.flex-blackjack-row-1 {
+    background: url('https://www.desktopbackground.org/p/2013/09/10/636598_solid-dark-blue-backgrounds-wallpapers-abstract-wallpapers-localwom_3888x2592_h.jpg') center;
+    color: white;
+    height: 500px;
+}
