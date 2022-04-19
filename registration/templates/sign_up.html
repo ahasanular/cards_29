@@ -1,0 +1,66 @@
+{% extends 'layout/base.html' %}
+
+{% block body %}
+    <div class="container w-50" id="mainBox">
+        <h2><strong>Sign UP<br><span id="feedback" style="color: tomato;"></span></strong></h2>
+        {% csrf_token %}
+        <div class="row mt-5">
+            <div class="col align-items-center">
+                <span><label for="name">Name</label></span>
+            </div>
+            <div class="col">
+                <span><input type="text" class="input-lg" id="name" name="name" value=""></span>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col align-items-center">
+                <span><label for="email">Email</label></span>
+            </div>
+            <div class="col">
+                <span><input type="email" class="input-lg" id="email" name="email" value=""></span>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col align-items-center">
+                <span><label for="password">Password</label></span>
+            </div>
+            <div class="col">
+                <span><input type="password" class="input-lg" id="password" name="password" value=""></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <span><input type="submit" class="m-5 btn btn-lg neuEffect" value="Sign Up" id="sign_up"></span>
+        </div>
+    </div>
+
+    <script>
+        $('#sign_up').click(function(){
+            input_data = {}
+            input_data['name'] = $('#name').val()
+            input_data['email'] = $('#email').val()
+            input_data['password'] = $('#password').val()
+
+            $.ajax({
+                type: "POST",
+                headers: {"X-CSRFToken": '{{csrf_token}}'},
+                url: "http://127.0.0.1:8000/registration/sign_up_api/",
+                data: JSON.stringify(input_data),
+                success: function(data){
+                    // console.log("success checking!")
+                    // console.log(data)
+                    if(data.status == 200){
+                        window.location = "/registration/sign_in/"
+                    }
+                    else{
+                        $('#feedback').html(data.message)
+                    }
+                },
+                error: function(data){
+                    console.log("error checking!")
+                    console.log(data)
+                },
+            })
+        })
+    </script>
+{% endblock %}

@@ -51,7 +51,30 @@
     </footer>
 
     <script>
+        let str = document.cookie
 
+        str = str.split('; ');
+        const cookies = {};
+        for (let i in str) {
+            const cur = str[i].split('=');
+            cookies[cur[0]] = cur[1];
+        }
+
+        if(cookies.access_token == null){
+            $('.signUp').show()
+            $('#signIn').show()
+            $('#signOut').hide()
+            $('#nameAndDp').hide()
+        }
+        else if(cookies.access_token != null){
+            $('.signUp').hide()
+            $('#signIn').hide()
+            $('#nameAndDp').html(`
+                <div id="myacc"><span><strong class="ms-3">${cookies.name}</strong></span></div>
+            `)
+            $('#nameAndDp').show()
+            $('#signOut').show()
+        }
     </script>
 </body>
 </html>
