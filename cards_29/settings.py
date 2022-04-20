@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     #local apps
     'home',
     'registration',
+    'rooms',
 
     #3rd party apps
     'rest_framework',

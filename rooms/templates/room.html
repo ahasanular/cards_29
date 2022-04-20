@@ -1,0 +1,134 @@
+{% extends 'layout/base.html' %}
+
+{% block body %}
+    <div class="row" id="mainBox">
+        <div id="feedback"></div>
+        <div class="container">
+            <div class="row m-5 w-25 mx-auto">
+                <button class="btn btn-lg neuEffect" onclick="create_room()">Create Room</button>
+            </div>
+            <div class="row m-5 w-25 mx-auto">
+                <button class="btn btn-lg neuEffect" onclick="join_room()">Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let x = document.cookie
+        .split(';')
+        .map(cookie => cookie.split('='))
+        .reduce((accumulator, [key, value]) => ({ ...accumulator, [key.trim()]: decodeURIComponent(value) }), {});
+
+        room_id = window.location.href.split('/')
+
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/rooms/room_status_api/" + room_id[5] + "/",
+            headers: {Authorization: 'Bearer ' + x.access_token},
+            data: "",
+            success: function(data){
+                console.log("success checking")
+                console.log(data)
+
+                if(data.status == 200){
+
+                    if(data.person_2 != null){
+                        person_2 = data.person_2.full_name
+                    }
+                    else{
+                        person_2 = `<span class="fa fa-plus neuEffect rounded-circle" style="font-size: 20px;" id="person_2" onclick="join_seat(this)"></span>`
+                    }
+                    if(data.person_3 != null){
+                        person_3 = data.person_3.full_name
+                    }
+                    else{
+                        person_3 = `<span class="fa fa-plus neuEffect rounded-circle" style="font-size: 20px;" id="person_3" onclick="join_seat(this)"></span>`
+                    }
+                    if(data.person_4 != null){
+                        person_4 = data.person_4.full_name
+                    }
+                    else{
+                        person_4 = `<span class="fa fa-plus neuEffect rounded-circle" style="font-size: 20px;" id="person_4" onclick="join_seat(this)"></span>`
+                    }
+
+                    $('#mainBox').html(`
+                        <br>
+                        <div class="container-5">
+                            <h2><strong>Card Game</strong></h2>
+                            <h3><span id="">Let's Play</span></h3>
+
+                            <div class="main_table container pt-3">
+                                <div class="row align-items-center" style="height: 33%;">
+                                    <div class="col">
+                                        11
+                                    </div>
+                                    <div class="col">
+                                        <span class="btn btn-lg neuEffect" style="font-size: 16px;">${person_3}</span>
+                                    </div>
+                                    <div class="col">
+                                        <span class="btn btn-lg text-white">Room Code : ${data.room_code}</span>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center" style="height: 33%;">
+                                    <div class="col">
+                                        <span class="btn btn-lg neuEffect" style="font-size: 16px;">${person_4}</span>
+                                    </div>
+                                    <div class="col">
+                                        Main Board
+                                    </div>
+                                    <div class="col">
+                                        <span class="btn btn-lg neuEffect" style="font-size: 16px;">${person_2}</span>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center" style="height: 33%;">
+                                    <div class="col">
+                                        31
+                                    </div>
+                                    <div class="col">
+                                        <span class="btn btn-lg neuEffect">${data.person_1.full_name}</span>
+                                    </div>
+                                    <div class="col">
+                                        33
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <br>
+                    `)
+                }
+            },
+            error: function(data){
+                console.log("error checking")
+                console.log(data)
+            },
+        })
+
+        function join_seat(seat_no){
+            room_id = window.location.href.split('/')
+            input_data = {}
+            input_data['seat_no'] = seat_no.id;
+            input_data['room_id'] = room_id[5];
+
+            $.ajax({
+                type: "PUT",
+                url: "http://127.0.0.1:8000/rooms/join_seat_api/",
+                headers: {Authorization: 'Bearer ' + x.access_token},
+                data: JSON.stringify(input_data),
+                success: function(data){
+                    console.log("success checking")
+                    console.log(data)
+
+                    if(data.status == 200){
+                        window.location = "/rooms/room/" + data.room_id + "/"
+                    }
+                },
+                error: function(data){
+                    console.log("error checking")
+                    console.log(data)
+                },
+            })
+        }
+
+    </script>
+{% endblock %}

@@ -2,52 +2,93 @@
 
 {% block body %}
     <div class="row" id="mainBox">
-        <br>
-        <div class="container-5">
-            <h2><strong>Card Game</strong></h2>
-            <h3><span id="blackjack-result">Let's Play</span></h3>
-
-            <div class="flex-blackjack-row-1 container pt-3">
-                <div class="row align-items-center" style="height: 33%;">
-                    <div class="col">
-                        11
-                    </div>
-                    <div class="col">
-                        User 1
-                    </div>
-                    <div class="col">
-                        13
-                    </div>
-                </div>
-                <div class="row align-items-center" style="height: 33%;">
-                    <div class="col">
-                        User 2
-                    </div>
-                    <div class="col">
-                        Main Board
-                    </div>
-                    <div class="col">
-                        User 4
-                    </div>
-                </div>
-                <div class="row align-items-center" style="height: 33%;">
-                    <div class="col">
-                        31
-                    </div>
-                    <div class="col">
-                        Me
-                    </div>
-                    <div class="col">
-                        33
-                    </div>
-                </div>
+        <div id="feedback"></div>
+        <div class="container">
+            <div class="row m-5 w-25 mx-auto">
+                <button class="btn btn-lg neuEffect" onclick="create_room()">Create Room</button>
             </div>
-
+            <div class="row m-5 w-25 mx-auto">
+                <button class="btn btn-lg neuEffect" onclick="join_room()">Join Room</button>
+            </div>
         </div>
-        <br>
     </div>
 
     <script>
+        let x = document.cookie
+        .split(';')
+        .map(cookie => cookie.split('='))
+        .reduce((accumulator, [key, value]) => ({ ...accumulator, [key.trim()]: decodeURIComponent(value) }), {});
 
+        function create_room(){
+            $.ajax({
+                type: "POST",
+                url: "http://127.0.0.1:8000/rooms/create_room_api/",
+                headers: {Authorization: 'Bearer ' + x.access_token},
+                data: "",
+                success: function(data){
+                    console.log("success checking")
+                    console.log(data)
+
+                    if(data.status == 200){
+                        window.location = "/rooms/room/" + data.room_id + "/"
+                    }
+                    else if(data.status = 208){
+                        $('#feedback').html(`<h2 style="color: tomato;">You Are already in a room : ${data.room_code}</h2>`)
+                    }
+                    else if(data.status == 401){
+                        window.location = "/registration/sign_in/"
+                    }
+                },
+                error: function(data){
+                    console.log("error checking")
+                    console.log(data)
+                    if(data.status == 401){
+                        window.location = "/registration/sign_in/"
+                    }
+                    else{
+                        $('#feedback').html(`<h2 style="color: tomato;">${data.room_code}</h2>`)
+                    }
+                },
+            })
+        }
+
+        function join_room(){
+            $('#mainBox').html(`
+                <div class="container">
+                    <div class="row m-5 w-25 mx-auto">
+                        <span><strong>Please give the Joining code (*)</strong></span>
+                        <input type="text" class="input-lg" id="join_code" value="" required>
+                    </div>
+                    <div class="row m-5 w-25 mx-auto">
+                        <input type="submit" class="btn btn-lg neuEffect" value="Join" id="join_room">
+                    </div>
+                </div>
+            `)
+
+            $('#join_room').click(function(){
+                input_data = {}
+                input_data['join_code'] = $('#join_code').val()
+
+                $.ajax({
+                    type: "POST",
+                    url: "http://127.0.0.1:8000/rooms/join_room_api/",
+                    headers: {Authorization: 'Bearer ' + x.access_token},
+                    data: JSON.stringify(input_data),
+                    success: function(data){
+                        console.log("success checking")
+                        console.log(data)
+
+                        if(data.status == 200){
+                            window.location = "/rooms/room/" + data.room_id + "/"
+                        }
+                    },
+                    error: function(data){
+                        console.log("error checking")
+                        console.log(data)
+                    },
+                })
+            })
+
+        }
     </script>
 {% endblock %}
