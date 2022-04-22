@@ -58,14 +58,12 @@ class Sign_up(CreateAPIView):
             user = User.objects.filter(email=data['email']).first()
 
             username = data['email'].split('@')
-            name = data['name'].split(' ')
 
             if not user:
                 user = User()
                 user.username = username[0]
                 user.email = data['email']
-                user.first_name = name[0]
-                user.last_name = name[1]
+                user.first_name = data['name']
                 user.password = make_password(data['password'])
                 user.is_active = True
 

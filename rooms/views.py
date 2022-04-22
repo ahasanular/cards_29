@@ -69,6 +69,44 @@ class Room_status_api(ListAPIView):
         try:
             room = Room.objects.filter(id=id).first()
 
+            print("before")
+            print(room.person_1)
+            print(room.person_2)
+
+            if room.person_1 and room.person_1.user == request.user:
+                pass
+            elif room.person_2 and room.person_2.user == request.user:
+                temp = room.person_1
+                room.person_1 = room.person_2
+                room.person_2 = room.person_3
+                room.person_3 = room.person_4
+                room.person_4 = temp
+
+            elif room.person_3 and room.person_3.user == request.user:
+                temp = room.person_1
+                room.person_1 = room.person_3
+                room.person_3 = temp
+
+                temp = room.person_4
+                room.person_4 = room.person_2
+                room.person_2 = temp
+
+            elif room.person_4 and room.person_4.user == request.user:
+                temp = room.person_1
+                room.person_1 = room.person_4
+                room.person_4 = room.person_3
+                room.person_3 = room.person_2
+                room.person_2 = temp
+
+                # room.person_1, room.person_2 = room.person_2, room.person_1
+                # room.person_2, room.person_3 = room.person_3, room.person_2
+                # room.person_3, room.person_4 = room.person_4, room.person_3
+
+            print("after")
+            print(room.person_1)
+            print(room.person_2)
+
+
             if not room:
                 feedback = {}
                 feedback['message'] = "room not found with this ID !"
@@ -104,23 +142,11 @@ class Join_room_api(CreateAPIView):
 
             room = Room.objects.filter(room_code=data['join_code']).first()
 
-            if not room:
-                feedback = {}
-                feedback['message'] = "No Room found with this code!"
-                feedback['status'] = HTTP_400_BAD_REQUEST
-                return Response(feedback)
-            else:
-                if not room.person_1 or not room.person_2 or not room.person_3 or not room.person_4:
-                    feedback = {}
-                    feedback['message'] = "Joined the room successfully!"
-                    feedback['status'] = HTTP_200_OK
-                    feedback['room_id'] = str(room.id)
-                    return Response(feedback)
-                else:
-                    feedback = {}
-                    feedback['message'] = "Room is Already FULL !"
-                    feedback['status'] = HTTP_400_BAD_REQUEST
-                    return Response(feedback)
+            feedback = {}
+            feedback['message'] = "Joined the room successfully!"
+            feedback['status'] = HTTP_200_OK
+            feedback['room_id'] = str(room.id)
+            return Response(feedback)
 
         except Exception as ex:
             feedback = {}
