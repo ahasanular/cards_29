@@ -10,4 +10,5 @@ urlpatterns = [
     path('room_status_api/<str:id>/', views.Room_status_api.as_view()),
     path('join_room_api/', views.Join_room_api.as_view()),
     path('join_seat_api/', views.Join_seat_api.as_view()),
+    path('<str:id>/start_game_api/', views.Start_game_api.as_view()),
 ]

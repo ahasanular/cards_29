@@ -1,9 +1,10 @@
 import json
 
 from django.shortcuts import render
-from .models import Room
+from .models import Room, Deck, Card
 from registration.models import AppUser
 import secrets
+import random
 
 #for api's
 from rest_framework.generics import CreateAPIView,ListAPIView
@@ -67,11 +68,16 @@ class Room_status_api(ListAPIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, id):
         try:
+            print("ID TEST")
+            print(id)
+            app_user = AppUser.objects.filter(user=request.user).first()
+            print("App_user TEST")
+            print(app_user)
+            # room = Room.objects.filter(id=id).annotate(cards=Card.objects.filter(app_user=app_user).all()).first()
             room = Room.objects.filter(id=id).first()
 
-            print("before")
-            print(room.person_1)
-            print(room.person_2)
+            print("ROOM<MMMMMMMM")
+            print(room)
 
             if room.person_1 and room.person_1.user == request.user:
                 pass
@@ -98,15 +104,6 @@ class Room_status_api(ListAPIView):
                 room.person_3 = room.person_2
                 room.person_2 = temp
 
-                # room.person_1, room.person_2 = room.person_2, room.person_1
-                # room.person_2, room.person_3 = room.person_3, room.person_2
-                # room.person_3, room.person_4 = room.person_4, room.person_3
-
-            print("after")
-            print(room.person_1)
-            print(room.person_2)
-
-
             if not room:
                 feedback = {}
                 feedback['message'] = "room not found with this ID !"
@@ -114,8 +111,16 @@ class Room_status_api(ListAPIView):
                 return Response(feedback)
             else:
                 room = serializers.Room_status_api_Serializer(room).data
-                room['status'] = HTTP_200_OK
-                return Response(room)
+                card = Card.objects.filter(app_user=app_user).all()
+
+                if not card:
+                    room['status'] = HTTP_200_OK
+                    return Response(room)
+                else:
+                    card = serializers.Card_Serializer(card, many=True).data
+                    room['cards'] = card
+                    room['status'] = HTTP_200_OK
+                    return Response(room)
 
         except Exception as ex:
             feedback = {}
@@ -206,6 +211,71 @@ class Join_seat_api(CreateAPIView):
                 feedback['status'] = HTTP_200_OK
                 feedback['room_id'] = str(room.id)
                 return Response(feedback)
+
+        except Exception as ex:
+            feedback = {}
+            feedback['message'] = str(ex)
+            feedback['status'] = HTTP_400_BAD_REQUEST
+            return Response(feedback)
+
+
+
+def spread_card(person, card_deck, last_card):
+    for i in range(4):
+        card = Card()
+        card.app_user = person
+        card.card = card_deck[last_card]
+        card.save()
+
+        # print(card_deck[last_card])
+        # card_deck[last_card].app_user = person
+        # card_deck[last_card].save()
+        last_card = last_card + 1
+    return last_card
+
+
+class Start_game_api(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        try:
+            if not request.user or request.user == '':
+                feedback = {}
+                feedback['message'] = "No user found !"
+                feedback['status'] = HTTP_400_BAD_REQUEST
+                return Response(feedback)
+
+            room = Room.objects.filter(person_1__user=request.user).first()
+
+            if not room:
+                feedback = {}
+                feedback['message'] = "You are not the host !"
+                feedback['status'] = HTTP_400_BAD_REQUEST
+                return Response(feedback)
+
+            card_deck = Deck.objects.filter().all()
+            card_deck = list(card_deck)
+            random.shuffle(card_deck)
+
+            print("Deck Before")
+            print(card_deck)
+
+            # first half card
+            last_card = 0
+            last_card = spread_card(room.person_1, list(card_deck), last_card)
+            last_card = spread_card(room.person_2, list(card_deck), last_card)
+            last_card = spread_card(room.person_3, list(card_deck), last_card)
+            last_card = spread_card(room.person_4, list(card_deck), last_card)
+
+            # second half card
+            last_card = spread_card(room.person_1, list(card_deck), last_card)
+            last_card = spread_card(room.person_2, list(card_deck), last_card)
+            last_card = spread_card(room.person_3, list(card_deck), last_card)
+            last_card = spread_card(room.person_4, list(card_deck), last_card)
+
+            feedback = {}
+            feedback['message'] = "All good and Card have been spreaded to everyone !"
+            feedback['status'] = HTTP_200_OK
+            return Response(feedback)
 
         except Exception as ex:
             feedback = {}

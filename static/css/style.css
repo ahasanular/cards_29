@@ -11,9 +11,11 @@
 }
 
 .main_table {
-    background: url('https://www.desktopbackground.org/p/2013/09/10/636598_solid-dark-blue-backgrounds-wallpapers-abstract-wallpapers-localwom_3888x2592_h.jpg') center;
+    /*background: url('https://thumbs.dreamstime.com/b/empty-brown-rustic-wooden-plank-table-flat-lay-top-view-above-copy-space-144230578.jpg') no-repeat center;*/
+    background: url('https://thumbs.dreamstime.com/b/brown-wood-plank-wall-27988899.jpg') no-repeat center;
+    /*background: url('images/background.jpg') no-repeat center;*/
+    background-size: cover;
     color: white;
-    height: 650px;
 }
 
 .neuEffect{

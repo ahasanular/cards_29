@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Room
+from .models import Room, Deck, Card
 from registration.models import AppUser
 
 
@@ -16,3 +16,16 @@ class Room_status_api_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ['person_1', 'person_2', 'person_3', 'person_4', 'room_code']
+
+
+class Deck_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Deck
+        fields = ['suit', 'card_no', 'priority', 'point', 'img']
+
+class Card_Serializer(serializers.ModelSerializer):
+    card = Deck_Serializer()
+    class Meta:
+        model = Card
+        fields = ['card']
+
